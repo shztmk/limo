@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+
+jobs:
+  phpunit:
+    name: Run_Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Install_Dependencies
+        uses: nick-invision/retry@v1
+        with:
+          timeout_minutes: 5
+          max_attempts: 5
+          command: composer update --no-interaction --no-progress
+
+      - name: Run_Test
+        run: vendor/bin/phpunit
