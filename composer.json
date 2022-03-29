@@ -1,0 +1,17 @@
+{
+    "name": "shztmk/limo",
+    "description": "LIMO is a PHP library to abstract and mock literals when testing.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Shztmk\\Limo\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "shztmk"
+        }
+    ],
+    "require": {}
+}

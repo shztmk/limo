@@ -1,0 +1,7 @@
+version: '3'
+services:
+  php81:
+    build: ./docker
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
