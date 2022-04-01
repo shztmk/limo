@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Limo;
+namespace Limo\MemorizedInvoker;
 
 /**
- * @package Limo
+ * @package Limo\MemorizedInvoker
  */
 final class MemorizedInvokerHandler
 {

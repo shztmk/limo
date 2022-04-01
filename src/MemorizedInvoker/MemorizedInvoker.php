@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Limo;
+namespace Limo\MemorizedInvoker;
 
 /**
- * @package Limo
+ * @package Limo\MemorizedInvoker
  */
 final class MemorizedInvoker
 {
@@ -64,7 +64,10 @@ final class MemorizedInvoker
                 ));
             }
 
-            if (false === in_array($generated, $this->generatedList[$typeOfGenerated], true)) {
+            if (
+                false === array_key_exists($typeOfGenerated, $this->generatedList)
+                || false === in_array($generated, $this->generatedList[$typeOfGenerated], true)
+            ) {
                 $this->generatedList[$typeOfGenerated][] = $generated;
                 return $generated;
             }
