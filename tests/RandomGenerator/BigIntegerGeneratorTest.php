@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Test\MemorizedInvoker;
+namespace Test\RandomGenerator;
 
 use Limo\RandomGenerator\BigIntegerGenerator;
 use PHPUnit\Framework\TestCase;
