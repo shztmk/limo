@@ -1,6 +1,10 @@
 FROM php:8.1-alpine
 
-RUN apk update
+# see: https://stackoverflow.com/a/57650040
+RUN apk update \
+    && apk add icu-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl
 
 WORKDIR /var/www
 
