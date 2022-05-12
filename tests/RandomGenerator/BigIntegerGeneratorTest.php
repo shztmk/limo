@@ -11,13 +11,13 @@ use PHPUnit\Framework\TestCase;
 class BigIntegerGeneratorTest extends TestCase
 {
     /**
-     * @covers ::generate
+     * @covers ::generateRandomIntegerByRange
      * @return void
      */
     final public function testGenerateIfMinIsGreaterThanMax(): void
     {
         self::expectException(\LogicException::class);
         self::expectErrorMessage('$min must be less than or equal to $max.');
-        BigIntegerGenerator::generate('10', '0');
+        BigIntegerGenerator::generateRandomIntegerByRange('10', '0');
     }
 }
