@@ -7,22 +7,23 @@ namespace Limo\MemorizedInvoker;
  */
 final class MemorizedInvokerHandler
 {
+    public const DEFAULT_OF_MAX_RETRY_COUNT = 3;
     private MemorizedInvoker $memorizedInvoker;
 
-    final public function __construct()
+    final public function __construct(int $maxRetryCount = self::DEFAULT_OF_MAX_RETRY_COUNT)
     {
-        $this->memorizedInvoker = new MemorizedInvoker();
+        $this->memorizedInvoker = new MemorizedInvoker($maxRetryCount);
     }
 
     /**
      * Consider integer argument $generated as already generated and returned.
-     * @param int $generated
+     * @param string $generated
      * @param bool $ignoreDuplicates
      * @return void
      */
-    final public function considerIntAsGenerated(int $generated, bool $ignoreDuplicates = false): void
+    final public function considerIntAsGenerated(string $generated, bool $ignoreDuplicates = false): void
     {
-        $this->memorizedInvoker->considerAsGenerated($generated, $ignoreDuplicates);
+        $this->memorizedInvoker->considerAsGenerated($generated, $ignoreDuplicates, 'integer');
     }
 
     /**
@@ -39,10 +40,10 @@ final class MemorizedInvokerHandler
     /**
      * Invoke $toInvoke so that the return value is always unique.
      * The Return value of $toInvoke must be INTEGER.
-     * @param callable $toInvoke fn() => int
-     * @return int
+     * @param callable $toInvoke fn() => BigInteger
+     * @return string
      */
-    final public function returnUniqInt(callable $toInvoke): int
+    final public function returnUniqInt(callable $toInvoke): string
     {
         return $this->memorizedInvoker->returnUniq($toInvoke, 'integer');
     }

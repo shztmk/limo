@@ -10,7 +10,7 @@ final class MemorizedInvoker
     /**
      * @param int $maxRetryCount
      */
-    final public function __construct(int $maxRetryCount = 3)
+    final public function __construct(int $maxRetryCount)
     {
         $this->maxRetryCount = $maxRetryCount;
     }
@@ -28,13 +28,19 @@ final class MemorizedInvoker
 
     /**
      * Consider the argument $generated as already generated and returned.
+     * @see https://www.php.net/manual/ja/function.gettype.php
      * @param mixed $generated
      * @param bool $ignoreDuplicates
+     * @param string|null $typeOfGenerated
      * @return void
      */
-    final public function considerAsGenerated(mixed $generated, bool $ignoreDuplicates = false): void
+    final public function considerAsGenerated(
+        mixed   $generated,
+        bool    $ignoreDuplicates = false,
+        ?string $typeOfGenerated = null
+    ): void
     {
-        $typeOfGenerated = gettype($generated);
+        $typeOfGenerated = $typeOfGenerated ?? gettype($generated);
         if (in_array($generated, $this->generatedList[$typeOfGenerated], true)) {
             if ($ignoreDuplicates) {
                 return;
@@ -48,21 +54,13 @@ final class MemorizedInvoker
 
     /**
      * Invoke $toInvoke so that the return value is always unique.
-     * @param callable $toInvoke fn() => T
-     * @return mixed T
+     * @param callable $toInvoke fn() => TReturn
+     * @return mixed TReturn
      */
     final public function returnUniq(callable $toInvoke, string $typeOfGenerated): mixed
     {
         for ($i = 1; $i <= $this->maxRetryCount; $i++) {
             $generated = $toInvoke();
-
-            if ($typeOfGenerated !== gettype($generated)) {
-                throw new \RuntimeException(sprintf(
-                    'Although we expected %s, invoker returned %s.',
-                    $typeOfGenerated,
-                    gettype($generated),
-                ));
-            }
 
             if (
                 false === array_key_exists($typeOfGenerated, $this->generatedList)
@@ -74,7 +72,7 @@ final class MemorizedInvoker
         }
         throw new \RuntimeException(sprintf(
             'The number of attempts to generate a unique %s has exceeded the limit.',
-            strtoupper($typeOfGenerated ?? '')
+            strtoupper($typeOfGenerated)
         ));
     }
 }
