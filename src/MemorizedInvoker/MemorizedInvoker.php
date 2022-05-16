@@ -16,7 +16,8 @@ final class MemorizedInvoker
     }
 
     /**
-     * @TODO Move to the configuration file.
+     * Number of attempts until a unique value appears when generated random values collide.
+     * @var int
      */
     private int $maxRetryCount;
 
@@ -28,28 +29,26 @@ final class MemorizedInvoker
 
     /**
      * Consider the argument $generated as already generated and returned.
-     * @see https://www.php.net/manual/ja/function.gettype.php
      * @param mixed $generated
+     * @param string $identifyKey
      * @param bool $ignoreDuplicates
-     * @param string|null $typeOfGenerated
      * @return void
      */
     final public function considerAsGenerated(
-        mixed   $generated,
-        bool    $ignoreDuplicates = false,
-        ?string $typeOfGenerated = null
+        mixed  $generated,
+        string $identifyKey,
+        bool   $ignoreDuplicates = false
     ): void
     {
-        $typeOfGenerated = $typeOfGenerated ?? gettype($generated);
-        if (in_array($generated, $this->generatedList[$typeOfGenerated], true)) {
+        if (in_array($generated, $this->generatedList[$identifyKey], true)) {
             if ($ignoreDuplicates) {
                 return;
             }
             throw new \RuntimeException(
-                sprintf('%s argument $generated has already been generated and returned.', ucfirst($typeOfGenerated))
+                sprintf('%s argument $generated has already been generated and returned.', ucfirst($identifyKey))
             );
         }
-        $this->generatedList[$typeOfGenerated][] = $generated;
+        $this->generatedList[$identifyKey][] = $generated;
     }
 
     /**
@@ -57,22 +56,22 @@ final class MemorizedInvoker
      * @param callable $toInvoke fn() => TReturn
      * @return mixed TReturn
      */
-    final public function returnUniq(callable $toInvoke, string $typeOfGenerated): mixed
+    final public function returnUniq(callable $toInvoke, string $identifyKey): mixed
     {
         for ($i = 1; $i <= $this->maxRetryCount; $i++) {
             $generated = $toInvoke();
 
             if (
-                false === array_key_exists($typeOfGenerated, $this->generatedList)
-                || false === in_array($generated, $this->generatedList[$typeOfGenerated], true)
+                false === array_key_exists($identifyKey, $this->generatedList)
+                || false === in_array($generated, $this->generatedList[$identifyKey], true)
             ) {
-                $this->generatedList[$typeOfGenerated][] = $generated;
+                $this->generatedList[$identifyKey][] = $generated;
                 return $generated;
             }
         }
         throw new \RuntimeException(sprintf(
             'The number of attempts to generate a unique %s has exceeded the limit.',
-            strtoupper($typeOfGenerated)
+            strtoupper($identifyKey)
         ));
     }
 }
