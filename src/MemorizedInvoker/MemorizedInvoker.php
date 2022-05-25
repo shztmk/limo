@@ -23,7 +23,7 @@ final class MemorizedInvoker
 
     /**
      * Array to store values generated and returned.
-     * @var array
+     * @var array<string, array>
      */
     private array $generatedList = [];
 
@@ -53,8 +53,9 @@ final class MemorizedInvoker
 
     /**
      * Invoke $toInvoke so that the return value is always unique.
-     * @param callable $toInvoke fn() => TReturn
-     * @return mixed TReturn
+     * @template TReturn
+     * @param callable(): TReturn $toInvoke
+     * @return TReturn
      */
     final public function returnUniq(callable $toInvoke, string $identifyKey): mixed
     {

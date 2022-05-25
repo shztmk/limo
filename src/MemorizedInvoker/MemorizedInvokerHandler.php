@@ -2,6 +2,8 @@
 
 namespace Limo\MemorizedInvoker;
 
+use phpseclib3\Math\BigInteger;
+
 /**
  * @package Limo\MemorizedInvoker
  */
@@ -43,19 +45,23 @@ final class MemorizedInvokerHandler
 
     /**
      * Invoke $toInvoke so that the return value is always unique.
-     * The Return value of $toInvoke must be INTEGER.
-     * @param callable $toInvoke fn() => BigInteger
+     * The Return value of $toInvoke must be BigInteger.
+     * @param callable(): BigInteger $toInvoke
      * @return string
      */
     final public function returnUniqInt(callable $toInvoke): string
     {
-        return $this->memorizedInvoker->returnUniq($toInvoke, 'integer');
+        return $this->memorizedInvoker
+            ->returnUniq(
+                fn(): string => $toInvoke()->toString(),
+                'integer'
+            );
     }
 
     /**
      * Invoke $toInvoke so that the return value is always unique.
-     * The Return value of $toInvoke must be STRING.
-     * @param callable $toInvoke fn() => string
+     * The Return value of $toInvoke must be string.
+     * @param callable(): string $toInvoke
      * @return string
      */
     final public function returnUniqString(callable $toInvoke): string

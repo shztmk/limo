@@ -4,6 +4,7 @@ namespace Limo\RandomGenerator;
 
 use Exception;
 use RangeException;
+use RuntimeException;
 
 /**
  * @package Test\Util
@@ -15,7 +16,7 @@ final class StringGenerator
      * @TODO Move to the configuration file.
      * @var string
      */
-    private const KEY_SPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    public const KEY_SPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     /**
      * @param string $keyspace
@@ -23,7 +24,15 @@ final class StringGenerator
      */
     final public static function strlen(string $keyspace): int
     {
-        return grapheme_strlen($keyspace);
+        $length = grapheme_strlen($keyspace);
+        if (is_int($length)) {
+            return $length;
+        }
+
+        throw new RuntimeException(sprintf(
+            'Something wrong happened at grapheme_strlen. $keyspace:%s',
+            $keyspace
+        ));
     }
 
     /**
@@ -33,7 +42,16 @@ final class StringGenerator
      */
     final public static function substr(string $keyspace, int $offset): string
     {
-        return grapheme_substr($keyspace, $offset, 1);
+        $string = grapheme_substr($keyspace, $offset, 1);
+        if (is_string($string)) {
+            return $string;
+        }
+
+        throw new RuntimeException(sprintf(
+            'Something wrong happened at grapheme_substr. $keyspace:%s, $offset:%d',
+            $keyspace,
+            $offset
+        ));
     }
 
     /**
@@ -42,15 +60,17 @@ final class StringGenerator
      * @see https://www.php.net/manual/en/function.random-int.php
      * @param int $length
      * @param string $keyspace
+     * @param bool $isEmptyAllowed
      * @return string
      * @throws Exception
      */
     final public static function generate(
         int    $length,
-        string $keyspace = self::KEY_SPACE
+        string $keyspace = self::KEY_SPACE,
+        bool   $isEmptyAllowed = false
     ): string
     {
-        if ($length < 1) {
+        if ($isEmptyAllowed === false && $length < 1) {
             throw new RangeException('The specified $length of string is not a positive number.');
         }
 
