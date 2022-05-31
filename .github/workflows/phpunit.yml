@@ -1,0 +1,55 @@
+name: Test
+
+on:
+  push:
+
+jobs:
+  phpunit:
+    name: Run Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3 # https://github.com/actions/checkout
+
+      - name: Setup php
+        uses: shivammathur/setup-php@v2 # https://github.com/shivammathur/setup-php
+        with:
+          php-version: 8.1
+          tools: composer:v2
+          coverage: xdebug
+          xtensions: intl-71.1 # https://github.com/shivammathur/icu-intl#icu4c-builds
+
+      # ref: https://www.github.wiki/ja/enterprise-server@3.1/actions/deployment/deploying-to-your-cloud-provider/deploying-to-azure/deploying-php-to-azure-app-service#creating-the-workflow
+      - name: Check if composer.json exists
+        id: check_files
+        uses: andstor/file-existence-action@v1 # https://github.com/andstor/file-existence-action
+        with:
+          files: 'composer.json'
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Set up dependency caching for faster installs
+        uses: actions/cache@v3 # https://github.com/actions/cache
+        if: steps.check_files.outputs.files_exists == 'true'
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Run composer install if composer.json exists
+        uses: nick-invision/retry@v2 # https://github.com/nick-fields/retry
+        if: steps.check_files.outputs.files_exists == 'true'
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          retry_on: error
+          command: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+
+      - name: Run_Test
+        run: vendor/bin/phpunit
